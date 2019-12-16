@@ -29,7 +29,7 @@
                                 <v-overflow-btn
                                         v-model="depositSum"
                                         :items="[100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1500, 2000]"
-                                        placeholder="Какую сумму Вы хотели бы взять?"
+                                        placeholder="Какую сумму Вы хотели бы разместить?"
                                 ></v-overflow-btn>
 
                                 <v-overflow-btn
