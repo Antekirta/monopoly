@@ -19,11 +19,13 @@
         <v-container>
             <h3>Акции</h3>
 
-            <ul>
+            <ul v-if="sharesToShow.length">
                 <li v-for="share in sharesToShow" :key="share.name">
                     <span>{{share.name}} : {{share.amount}}</span>
                 </li>
             </ul>
+
+            <p v-else>У Вас пока нет акций</p>
         </v-container>
 
         <br>

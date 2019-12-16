@@ -32,11 +32,11 @@
                                         placeholder="Какую сумму Вы хотели бы взять?"
                                 ></v-overflow-btn>
 
-                                <v-overflow-btn
-                                        v-model="loanTerm"
-                                        :items="[1, 2, 3]"
-                                        placeholder="На какой срок (количество ходов)?"
-                                ></v-overflow-btn>
+<!--                                <v-overflow-btn-->
+<!--                                        v-model="loanTerm"-->
+<!--                                        :items="[1, 2, 3]"-->
+<!--                                        placeholder="На какой срок (количество ходов)?"-->
+<!--                                ></v-overflow-btn>-->
 
                                 <br />
 
@@ -77,8 +77,8 @@
             return {
                 hasLoan: false,
                 isLoanProcessing: false,
-                loanInterest: 0.5,
-                loanTerm: 1,
+                loanInterest: 0.2,
+                loanTerm: 3,
                 loanSum: 0
             }
         },
@@ -89,13 +89,13 @@
             },
 
             loanSumToReturn () {
-                return this.loanSum + this.loanInterest * this.loanSum * this.loanTerm;
+                return this.loanSum + this.loanInterest * this.loanSum;
             },
 
             loanMessage () {
-                const numeric = this.loanTerm === 1 ? 'круг' : 'кругов';
+                // const numeric = this.loanTerm === 1 ? 'круг' : 'кругов';
 
-                return `Через ${this.loanTerm} ${numeric} Вы должны будете вернуть ${this.loanSumToReturn}.`
+                return `Через 3 круга Вы должны будете вернуть ${this.loanSumToReturn}.`
             },
 
             loanWarning () {

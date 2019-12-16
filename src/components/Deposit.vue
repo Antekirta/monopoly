@@ -34,7 +34,7 @@
 
                                 <v-overflow-btn
                                         v-model="depositTerm"
-                                        :items="[1, 2, 3]"
+                                        :items="[1, 2, 3, 4, 5]"
                                         placeholder="На какой срок (количество ходов)?"
                                 ></v-overflow-btn>
 
@@ -77,15 +77,31 @@
             return {
                 hasDeposit: false,
                 isDepositProcessing: false,
-                depositInterest: 0.1,
                 depositTerm: 1,
                 depositSum: 0
             }
         },
 
         computed: {
+            depositInterest () {
+                switch (this.depositTerm) {
+                    case 1:
+                        return 0.10;
+                    case 2:
+                        return 0.15;
+                    case 3:
+                        return 0.20;
+                    case 4:
+                        return 0.25;
+                    case 5:
+                        return 0.30;
+                }
+
+                return 0.10;
+            },
+
             depositInterestFormatted () {
-                return this.depositInterest * 10 + '0%';
+                return this.depositInterest * 100 + '%';
             },
 
             depositSumToReturn () {
