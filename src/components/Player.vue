@@ -1,83 +1,124 @@
 <template>
-    <v-card class="player">
-        <h2>{{name}}</h2>
+  <v-card class="player">
+    <h2>{{ name }}</h2>
 
-        <v-divider></v-divider>
+    <v-divider />
 
-        <br>
+    <br>
 
-        <loan :turns-to-return-credit="turnsToReturnCredit"
-              @loan-taken="onLoanTaken"
-              @loan-closed="turnsToReturnCredit = 0"
-        ></loan>
+    <loan
+      :turns-to-return-credit="turnsToReturnCredit"
+      @loan-taken="onLoanTaken"
+      @loan-closed="turnsToReturnCredit = 0"
+    />
 
-        <deposit :turns-to-take-deposit="turnsToTakeDeposit"
-                 @deposit-put="onDepositPut"
-                 @deposit-taken="turnsToTakeDeposit = 0"
-        ></deposit>
+    <deposit
+      :turns-to-take-deposit="turnsToTakeDeposit"
+      @deposit-put="onDepositPut"
+      @deposit-taken="turnsToTakeDeposit = 0"
+    />
 
-        <v-container>
-            <h3>Акции</h3>
+    <v-container>
+      <h3>Акции</h3>
 
-            <ul v-if="sharesToShow.length">
-                <li v-for="share in sharesToShow" :key="share.name">
-                    <span>{{share.name}} : {{share.amount}}</span>
-                </li>
-            </ul>
+      <ul v-if="sharesToShow.length">
+        <li
+          v-for="share in sharesToShow"
+          :key="share.name"
+        >
+          <span>{{ share.name }} : {{ share.amount }} штук по средней цене {{ share.averageCost }}</span>
+        </li>
+      </ul>
 
-            <p v-else>У Вас пока нет акций</p>
-        </v-container>
+      <p v-else>
+        У Вас пока нет акций
+      </p>
+    </v-container>
 
-        <br>
-        <br>
+    <br>
+    <br>
 
-        <v-btn @click="finishCircle" color="success">Завершить круг</v-btn>
+    <v-btn
+      color="success"
+      @click="finishCircle"
+    >
+      Завершить круг
+    </v-btn>
 
-        <v-dialog v-model="showEvent" max-width="400">
+    <v-dialog
+      v-model="showEvent"
+      max-width="400"
+    >
+      <v-card>
+        <v-card-title>{{ event.title }}</v-card-title>
+
+        <v-card-text>{{ event.message }}</v-card-text>
+
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            @click="showEvent = false"
+          >
+            Продолжить...
+          </v-btn>
+
+          <v-btn
+            v-if="event.type === $options.EVENT_TYPES.SHARES"
+            color="success"
+            @click="startSharesByingProcess(event.company)"
+          >
+            {{ event.dealType }} акции...
+          </v-btn>
+
+          <v-dialog
+            v-model="sharesByingInProcess"
+            :max-width="400"
+          >
             <v-card>
-                <v-card-title>{{event.title}}</v-card-title>
+              <v-card-title>Купить акции</v-card-title>
 
-                <v-card-text>{{event.message}}</v-card-text>
+              <v-card-text>
+                <v-overflow-btn
+                  v-model="amountOfSharesToBuy"
+                  :items="[10, 20, 30, 40, 50, 60, 70, 80, 90]"
+                  :placeholder="`Какое количество акций Вы хотели бы ${event.dealType}?`"
+                />
 
-                <v-card-actions>
-                    <v-btn @click="showEvent = false" color="primary">Продолжить...</v-btn>
+                <p>Итоговая сумма: {{ amountOfSharesToBuy * event.sharePrice }}</p>
+              </v-card-text>
 
-                    <v-btn v-if="event.type === $options.EVENT_TYPES.SHARES"
-                           @click="startSharesByingProcess(event.company)"
-                           color="success">{{event.dealType}} акции...
-                    </v-btn>
+              <v-card-actions>
+                <v-btn
+                  color="red"
+                  @click="amountOfSharesToBuy = false"
+                >
+                  Отмена
+                </v-btn>
 
-                    <v-dialog v-model="sharesByingInProcess" :max-width="400">
-                        <v-card>
-                            <v-card-title>Купить акции</v-card-title>
+                <v-spacer />
 
-                            <v-card-text>
-                                <v-overflow-btn
-                                        v-model="amountOfSharesToBuy"
-                                        :items="[10, 20, 30, 40, 50, 60, 70, 80, 90]"
-                                        :placeholder="`Какое количество акций Вы хотели бы ${event.dealType}?`"
-                                ></v-overflow-btn>
+                <v-btn
+                  v-if="event.dealType === $options.DEAL_TYPES.BUY"
+                  color="success"
+                  @click="buyShares(event.sharePrice)"
+                >
+                  Купить {{ company }}
+                </v-btn>
 
-                                <p>Итоговая сумма: {{amountOfSharesToBuy * event.sharePrice}}</p>
-                            </v-card-text>
-
-                            <v-card-actions>
-                                <v-btn color="red" @click="amountOfSharesToBuy = false">Отмена</v-btn>
-
-                                <v-spacer></v-spacer>
-
-                                <v-btn v-if="event.dealType === $options.DEAL_TYPES.BUY" color="success"
-                                       @click="buyShares">Купить {{company}}
-                                </v-btn>
-
-                                <v-btn v-else color="success" @click="sellShares">Продать {{company}}</v-btn>
-                            </v-card-actions>
-                        </v-card>
-                    </v-dialog>
-                </v-card-actions>
+                <v-btn
+                  v-else
+                  color="success"
+                  @click="sellShares"
+                >
+                  Продать {{ company }}
+                </v-btn>
+              </v-card-actions>
             </v-card>
-        </v-dialog>
-    </v-card>
+          </v-dialog>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-card>
 </template>
 
 <script>
@@ -100,15 +141,6 @@
             }
         },
 
-        created() {
-            this.$options.EVENT_TYPES = EVENT_TYPES;
-            this.$options.DEAL_TYPES = DEAL_TYPES;
-
-            Object.values(companies).forEach(company => {
-                this.$set(this.shares, company, 0);
-            })
-        },
-
         data() {
             return {
                 turnsToReturnCredit: 0,
@@ -126,14 +158,29 @@
 
         computed: {
             sharesToShow() {
-                return Object.keys(this.shares).map(key => {
+                return Object.values(this.shares)
+                    .map(share => {
                     return {
-                        name: key,
-                        amount: this.shares[key]
+                        name: share.name,
+                        amount: share.amount,
+                        averageCost: share.averageCost
                     }
                 })
                     .filter(share => share.amount);
             }
+        },
+
+        created() {
+            this.$options.EVENT_TYPES = EVENT_TYPES;
+            this.$options.DEAL_TYPES = DEAL_TYPES;
+
+            Object.values(companies).forEach(company => {
+                this.$set(this.shares, company, {
+                    name: company,
+                    amount: 0,
+                    averageCost: 0
+                });
+            })
         },
 
         methods: {
@@ -161,8 +208,20 @@
                 this.sharesByingInProcess = true;
             },
 
-            buyShares() {
-                this.shares[this.company] += this.amountOfSharesToBuy;
+            buyShares(sharePrice) {
+                // this.shares[this.company] += this.amountOfSharesToBuy;
+
+                this.shares[this.company] = {
+                    amount: this.shares[this.company].amount += this.amountOfSharesToBuy,
+                    name: this.company,
+                    averageCost: (() => {
+                        if (this.shares[this.company].averageCost) {
+                            return  (this.shares[this.company].averageCost + sharePrice) / 2;
+                        }
+
+                        return sharePrice;
+                    })()
+                };
 
                 this.sharesByingInProcess = false;
                 this.company = '';
