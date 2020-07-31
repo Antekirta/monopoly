@@ -59,7 +59,7 @@
             color="primary"
             @click="showEvent = false"
           >
-            Продолжить...
+            Закрыть
           </v-btn>
 
           <v-btn
@@ -67,7 +67,7 @@
             color="success"
             @click="startSharesByingProcess(event.company)"
           >
-            {{ event.dealType }} акции...
+            {{ event.dealType }} акции
           </v-btn>
 
           <v-dialog
@@ -102,7 +102,7 @@
                   color="success"
                   @click="buyShares(event.sharePrice)"
                 >
-                  Купить {{ company }}
+                  Купить {{ company.label }}
                 </v-btn>
 
                 <v-btn
@@ -110,7 +110,7 @@
                   color="success"
                   @click="sellShares"
                 >
-                  Продать {{ company }}
+                  Продать {{ company.label }}
                 </v-btn>
               </v-card-actions>
             </v-card>
@@ -127,25 +127,23 @@
     import {generateEvent} from "../providers/eventProvider";
     import {EVENT_TYPES} from "../registry/EVENTS";
     import {DEAL_TYPES} from "../registry/dealTypes";
-    import {companies} from "../registry/companies";
+    import {COMPANIES} from "../registry/companies";
 
     export default {
         name: 'Player',
-
         components: {Loan, Deposit},
-
         props: {
             name: {
                 type: String,
                 required: true
             }
         },
-
         data() {
             return {
                 turnsToReturnCredit: 0,
                 turnsToTakeDeposit: 0,
-                event: '',
+                /** @type {ShareEvent} */
+                event: {},
                 showEvent: false,
 
                 // shares
@@ -174,9 +172,9 @@
             this.$options.EVENT_TYPES = EVENT_TYPES;
             this.$options.DEAL_TYPES = DEAL_TYPES;
 
-            Object.values(companies).forEach(company => {
-                this.$set(this.shares, company, {
-                    name: company,
+            Object.values(COMPANIES).forEach(company => {
+                this.$set(this.shares, company.name, {
+                    name: company.label,
                     amount: 0,
                     averageCost: 0
                 });
@@ -210,13 +208,15 @@
 
             buyShares(sharePrice) {
                 // this.shares[this.company] += this.amountOfSharesToBuy;
+                const key = this.company.name;
 
-                this.shares[this.company] = {
-                    amount: this.shares[this.company].amount += this.amountOfSharesToBuy,
-                    name: this.company,
+
+                this.shares[key] = {
+                    amount: this.shares[key].amount += this.amountOfSharesToBuy,
+                    name: this.company.label,
                     averageCost: (() => {
-                        if (this.shares[this.company].averageCost) {
-                            return  (this.shares[this.company].averageCost + sharePrice) / 2;
+                        if (this.shares[key].averageCost) {
+                            return  (this.shares[key].averageCost + sharePrice) / 2;
                         }
 
                         return sharePrice;

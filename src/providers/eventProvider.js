@@ -1,7 +1,9 @@
 import _sample from 'lodash/sample'
+import _last from 'lodash/last'
+import _max from 'lodash/max'
 import {EVENTS, EVENT_TYPES} from '../registry/EVENTS'
 import {DEAL_TYPES} from '../registry/dealTypes'
-import {companies} from "../registry/companies";
+import {COMPANIES} from "../registry/companies";
 import {streets} from "../registry/streets";
 
 export const generateEvent = () => {
@@ -63,13 +65,70 @@ function generateFasEvent() {
     }
 }
 
+const pricesHistory = {};
+
+Object.keys(COMPANIES).map(key => {
+    pricesHistory[key] = [_sample([10, 20, 30, 40, 50, 100])]
+});
+
+/**
+ * Calculate new share's cost
+ * @param {Company} company
+ * @return {number}
+ */
+const calculateSharePrice = (company) => {
+    let price;
+
+    const coeffs = [0.5, 1, 2];
+
+    const chances = {
+        grow: _sample(coeffs) * company.chanceToGrow,
+        stay: _sample(coeffs) * company.chanceToStayTheSame,
+        lower: _sample(coeffs) * company.chanceToLower
+    };
+
+    const previousPrice = _last(pricesHistory[company.name]);
+
+    const theHighestChance = _max(Object.values(chances));
+
+    switch (theHighestChance) {
+        case chances.grow:
+            price = previousPrice + previousPrice * company.volatility;
+            break;
+        case chances.stay:
+            price = previousPrice;
+            break;
+        case chances.lower:
+            price = previousPrice - previousPrice * company.volatility;
+    }
+
+    pricesHistory[company.name].push(price);
+
+    return price;
+};
+
+/**
+ * @typedef {Object} ShareEvent
+ * @property {string} title
+ * @property {string} message
+ * @property {number} sharePrice
+ * @property {Company} company
+ * @property {string} type
+ */
+
+/**
+ *
+ * @return {ShareEvent}
+ */
 function generateSharesEvent() {
-    const company = _sample(companies);
-    const price = _sample([0, 10, 10, 10, 20, 20, 30, 30, 40, 50, 100]);
+    /** @type {Company} */
+    const company = _sample(COMPANIES);
     const title = 'Движение на фондовом рынке!';
     const dealType = _sample([DEAL_TYPES.BUY, DEAL_TYPES.SELL]);
 
-    const message = `Вы или любой другой игрок можете ${dealType} акции ${company} по цене ${price} за штуку.`;
+    let price = calculateSharePrice(company);
+
+    const message = `Вы можете ${dealType} акции ${company.label} по цене ${price} за штуку.`;
 
     return {
         title,
